@@ -98,7 +98,9 @@ const yr_max = view(Inputs.range([1941, 2020], {step:1, value: 1965}))
 
 <div class="grid grid-cols-2">
   <div>
-    The arc diagram displays subfields co-occurences within papers who cite Simon. Nodes size are in proportion (using `d3.scaleSqrt().range(3,10)`, that is, we map sum of citations to a [Square root scales](https://observablehq.com/@d3/continuous-scales#scale_sqrt) bounded between 3 and 10) to the sum of citations to Simon. Additionally, nodes are colored according to their field of research. This is a very neat way to know which subfields citing Simon tend to show up together. 
+    The arc diagram displays subfields co-occurences within papers who cite Simon. Nodes size are in proportion (using <code>d3.scaleSqrt().range(3,10)</code>, that is, we map sum of citations to a <a href=https://observablehq.com/@d3/continuous-scales#scale_sqrt>Square root scales</a> bounded between 3 and 10) to the sum of citations to Simon. Additionally, nodes are colored according to their field of research. This is a very neat way to know which subfields citing Simon tend to show up together. 
+    <br><br>
+    For instance, we can see that in 1965 Simon was particularly popular within <em>Artificial intelligence</em>. If you jump to the 2000s (say 2000-2005), you'll see that now <em>Economics and Econometrics</em> took over the fandom, with <em>Strategy and Management</em> being second. There are 29 different subfields citing Simon, from about 10 different fields (colors).
   </div>
   <div>${
     resize((width) => arc(nodes, links, {width}))
@@ -364,5 +366,10 @@ function arc(nodes, edges, {width} = {}) {
     font-size: 90px;
   }
 }
+
+#small-caps {
+  font-variant-caps: small-caps;
+}  
+
 
 </style>
