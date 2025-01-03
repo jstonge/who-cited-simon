@@ -76,6 +76,19 @@ const data_f = sel_catego.length == 0 ?
     </div>
 </div>
 
+#### Table to search categories
+
+```sql id=[...uniq_cat_search]
+SELECT DISTINCT category FROM timeseries where type = ${sel_field}
+```
+```js
+const selected_cat = view(Inputs.search(uniq_cat_search))
+```
+
+<div class="card", style="padding:0">${
+  Inputs.table(selected_cat)
+}
+</div>
 
 ## Looking at topic co-occurences for the beauty of it
 
