@@ -55,7 +55,7 @@ const data_f = sel_catego.length == 0 ?
     <div class="grid-colspan-2">${
         resize((width) => Plot.plot({
     style: "overflow: visible;",
-    y: {grid: true},
+    y: {grid: true, label: "yearly count of papers citing Simon"},
     width,
     color: {legend: true},
     marks: [
@@ -65,7 +65,7 @@ const data_f = sel_catego.length == 0 ?
             {x: "year", y: "count", stroke: "category", tip: true})
         )
     ],
-    caption: "P.s. smoothed with k=5"
+    caption: "P.s. But lines are smoothed with k=5"
     })
     )
     }
