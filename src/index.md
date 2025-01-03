@@ -7,7 +7,7 @@ sql:
 
 # Simon says
 
-Here we do some Herbert Simonology. We start by looking at who is citing Simon over time, by categories.  
+Here we do some Herbert Simonology. We start by looking at who is citing Simon over time, by categories.  Then we look at the arc diagram of which subfields is most citing Simon.
 
 ## Timeseries
 
