@@ -35,25 +35,29 @@ Here's the full table of his work:
 He is known to have publish in a wide variety of field of studies. Here we show the count of papers with associated [primary topics](https://docs.openalex.org/api-entities/topics):
 
 ```sql id=topic_count
-SELECT COUNT(primary_topic) as n, primary_topic as topic
+SELECT COUNT(primary_topic) as n, SUM(cited_by_count) as tot_cit, primary_topic as topic
 FROM simon_raw 
 WHERE primary_topic NOT NULL
 GROUP BY primary_topic
+```
+
+```js
+const tot_cit = view(Inputs.toggle({label: "Sum citations"}));
 ```
 
 <div>${resize((width) => Plot.plot({
   width,
   marginBottom: 130,
   x: {tickRotate:20, label: null},
-  y: {label: "count article", grid: true},
+  y: {label: tot_cit ? "sum citations" : "count article", grid: true},
   style: "overflow: visible;",
   marks: [
-    Plot.rectY(topic_count, {x: "topic", y: "n", ry2: 4, ry1: -4, clip: "frame", sort: {x: '-y', limit: 20}}),
+    Plot.rectY(topic_count, {x: "topic", y: tot_cit ? "tot_cit": "n", ry2: 4, ry1: -4, clip: "frame", sort: {x: '-y', limit: 30}}),
     Plot.ruleY([0])
   ]
 }))}</div>
 
-It is wild to think that Simon has published over 15 papers on `Sport Psychology and Performance`, while being mostly known for his work on bounded rationality, complex systems, and artificial intelligence.
+You can select the sum of citations by topics instead of the count of citing articles, if you want. You'll see that the ordering change a little bit, and the distributoin is a bit  more heavytail. It is wild to think that Simon has published over 15 papers on `Sport Psychology and Performance`, while being mostly known for his work on bounded rationality, complex systems, and artificial intelligence.
 
 Now, this is what Simon has done. But I wanted to know who engaged the most with Simon's work. To answer that, we compiled all the papers who cited Simon, by year. With this in hand, we could create the following timeseries:
 

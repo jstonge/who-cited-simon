@@ -45,7 +45,9 @@ def main():
     min_year = df.publication_year.min()
 
     # for each paper
+    tot_articles = len(df)
     for i,row in df.iterrows():
+        print(f"Processing {i+1}/{tot_articles}")
         
         for year in range(min_year, 2024):
 
@@ -72,7 +74,6 @@ def main():
                     out = {}
                 else:
                     # get details of each referenced work
-                    
                     citing_works_details = []
                     for work in tqdm(citing_works, total=len(citing_works)):
                         
