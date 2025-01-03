@@ -2,15 +2,60 @@
 toc: false
 sql: 
   simon: ./data/a5108357701_clean.parquet
+  simon_raw: ./data/a5108357701.parquet
   timeseries: ./data/timeseries.parquet
 ---
 
 # Simon says
 ## Lets do some Herbert Simonology. 
 
-We start by looking at how many papers are citing Simon over time, by a select category and year. Then we look at the arc diagram of which subfields is most citing Simon, and how these fields relate to each other.
+```sql id=[...simon_raw]
+SELECT * FROM simon_raw ORDER BY publication_year
+```
 
-## Timeseries
+According to the [OpenAlex](https://openalex.org/) database, Herbert Simon published a total of ${simon_raw.length} articles in his career.
+
+```js
+Plot.plot({
+  y: {label: "count article", grid: true},
+  marks: [
+    Plot.rectY(simon_raw, Plot.binX({y: "count"}, {x: "publication_year", ry2: 4, ry1: -4, clip: "frame"})),
+    Plot.ruleY([0])
+  ]
+})
+```
+
+Here's the full table of his work:
+
+<div class="card", style="padding:0">${
+  Inputs.table(simon_raw)
+}
+</div>
+
+He is known to have publish in a wide variety of field of studies. Here we show the count of papers with associated [primary topics](https://docs.openalex.org/api-entities/topics):
+
+```sql id=topic_count
+SELECT COUNT(primary_topic.display_name) as n, primary_topic.display_name as topic
+FROM simon_raw 
+WHERE primary_topic.display_name NOT NULL
+GROUP BY primary_topic.display_name
+```
+
+<div>${resize((width) => Plot.plot({
+  width,
+  marginBottom: 130,
+  x: {tickRotate:20, label: null},
+  y: {label: "count article", grid: true},
+  style: "overflow: visible;",
+  marks: [
+    Plot.rectY(topic_count, {x: "topic", y: "n", ry2: 4, ry1: -4, clip: "frame", sort: {x: '-y', limit: 20}}),
+    Plot.ruleY([0])
+  ]
+}))}</div>
+
+It is wild to think that Simon has published over 15 papers on `Sport Psychology and Performance`, while being mostly known for his work on bounded rationality, complex systems, and artificial intelligence.
+
+Now, this is what Simon has done. But I wanted to know who engaged the most with Simon's work. To answer that, we compiled all the papers who cited Simon, by year. With this in hand, we could create the following timeseries:
 
 ```sql id=[...ts_citing]
 SELECT * from timeseries WHERE type = ${sel_field} ORDER BY year
@@ -73,6 +118,8 @@ const data_f = sel_catego.length == 0 ?
     </div>
 </div>
 
+In the default view, we note the different waves of interest for Simon's work in `Artificial Intelligence`. As expected, `Economics and Econometrics` really like him, most likely for his work on bounded rationality and game theory (confirmed by looking at top `topics` instead of `subfields`, aka `Decision-Making and Behavioral Economics`). I was surprised to see the surge of interests for his work in behavioral economics starting in the 2000s. For some reason, I would've thought that it would've been way earlier. Anyway, the data is there to play with. Here's a small table to find relevant categories using keywords.
+
 #### Table to search categories
 
 ```sql id=[...uniq_cat_search]
@@ -87,20 +134,20 @@ const selected_cat = view(Inputs.search(uniq_cat_search))
 }
 </div>
 
-## Looking at topic co-occurences for the beauty of it
-
-Here, we look at all **incoming citation** for given years to Simon's work.
+In the timeseries, all the subfields are independent of each other. It is informative to look at how clusters of subfields are citing Simon. In the following plot, we look at all **incoming citations** by time periodto Simon's work.
 
 ```js
-const yr_min = view(Inputs.range([1940, 2024], {step:1, value: 1960}))
-const yr_max = view(Inputs.range([1941, 2020], {step:1, value: 1965}))
+const yr_min = view(Inputs.range([1940, 2024], {step:1, value: 2000}))
+const yr_max = view(Inputs.range([1941, 2020], {step:1, value: 2005}))
 ```
 
 <div class="grid grid-cols-2">
   <div>
-    The arc diagram displays subfields co-occurences within papers who cite Simon. Nodes size are in proportion (using <code>d3.scaleSqrt().range(3,10)</code>, that is, we map sum of citations to a <a href=https://observablehq.com/@d3/continuous-scales#scale_sqrt>Square root scales</a> bounded between 3 and 10) to the sum of citations to Simon. Additionally, nodes are colored according to their field of research. This is a very neat way to know which subfields citing Simon tend to show up together. 
+    The arc diagram displays subfields co-occurences within papers who cite Simon. Nodes size are in proportion to total citations from a given subfield during that time period to Simon's works (using <code>d3.scaleSqrt().range(3,10)</code>. That is, we map sum of citations to a <a href=https://observablehq.com/@d3/continuous-scales#scale_sqrt>Square root scales</a> bounded between 3 and 10). Additionally, nodes are colored according to their field of research. This is a very neat way to know which subfields citing Simon tend to show up together. 
     <br><br>
-    For instance, we can see that in 1965 Simon was particularly popular within <em>Artificial intelligence</em>. If you jump to the 2000s (say 2000-2005), you'll see that now <em>Economics and Econometrics</em> took over the fandom, with <em>Strategy and Management</em> being second. There are 29 different subfields citing Simon, from about 10 different fields (colors).
+    Using knowledge from the previous plot, the default values show subfields citing Simon in the 2000s (say 2000-2005). You can see that now <em>Economics and Econometrics</em> took over the fandom, with <em>Strategy and Management</em> being second. If you go back in the 1960s, you'll see that Simon was originally popular within <em>Artificial intelligence</em> Counting all the subfields, we can see that there there 29 different subfields citing Simon, spanning about 10 different fields (colors)!
+    <br><br>
+    If you are interested which subfields are citing which papers, here is a small table summarizing that information.
   </div>
   <div>${
     resize((width) => arc(nodes, links, {width}))
@@ -160,9 +207,7 @@ FROM simon
 WHERE publication_year > ${yr_min} AND publication_year < ${yr_max} AND source != target 
 GROUP BY source, target
 ```
-```js
-nodes
-```
+
 
 ```sql id=[...nodes]
 WITH source_target_groups AS (
