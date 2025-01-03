@@ -10,7 +10,7 @@ sql:
 ## Lets do some Herbert Simonology. 
 
 ```sql id=[...simon_raw]
-SELECT * FROM simon_raw ORDER BY publication_year
+SELECT * EXCLUDE(__index_level_0__, abstract_inverted_index) FROM simon_raw ORDER BY publication_year
 ```
 
 According to the [OpenAlex](https://openalex.org/) database, Herbert Simon published a total of ${simon_raw.length} articles in his career.
@@ -35,10 +35,10 @@ Here's the full table of his work:
 He is known to have publish in a wide variety of field of studies. Here we show the count of papers with associated [primary topics](https://docs.openalex.org/api-entities/topics):
 
 ```sql id=topic_count
-SELECT COUNT(primary_topic.display_name) as n, primary_topic.display_name as topic
+SELECT COUNT(primary_topic) as n, primary_topic as topic
 FROM simon_raw 
-WHERE primary_topic.display_name NOT NULL
-GROUP BY primary_topic.display_name
+WHERE primary_topic NOT NULL
+GROUP BY primary_topic
 ```
 
 <div>${resize((width) => Plot.plot({
