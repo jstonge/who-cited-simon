@@ -6,8 +6,9 @@ sql:
 ---
 
 # Simon says
+## Lets do some Herbert Simonology. 
 
-Here we do some Herbert Simonology. We start by looking at who is citing Simon over time, by categories.  Then we look at the arc diagram of which subfields is most citing Simon.
+We start by looking at how many papers are citing Simon over time, by a select category and year. Then we look at the arc diagram of which subfields is most citing Simon, and how these fields relate to each other.
 
 ## Timeseries
 
@@ -97,7 +98,7 @@ const yr_max = view(Inputs.range([1941, 2020], {step:1, value: 1965}))
 
 <div class="grid grid-cols-2">
   <div>
-    The arc diagram displays subfields co-occurences within paper with <em>Statistical mechanics of complex networks</em> as primary topic. Nodes are colored according to their field of research. This is a very neat way to know which subfields tend to show up together. 
+    The arc diagram displays subfields co-occurences within papers who cite Simon. Nodes size are in proportion (using `d3.scaleSqrt().range(3,10)`, that is, we map sum of citations to a [Square root scales](https://observablehq.com/@d3/continuous-scales#scale_sqrt) bounded between 3 and 10) to the sum of citations to Simon. Additionally, nodes are colored according to their field of research. This is a very neat way to know which subfields citing Simon tend to show up together. 
   </div>
   <div>${
     resize((width) => arc(nodes, links, {width}))
@@ -200,7 +201,7 @@ function arc(nodes, edges, {width} = {}) {
     const y = d3.scalePoint(orders.get("by group"), [marginTop, height - marginBottom]);
 
     const rScale = d3.scaleSqrt()
-        .domain([d3.min(nodes, d => d.n), d3.max(nodes, d => d.n)]) // Input range
+        .domain([d3.min(nodes, d => d.n === null ? 0 : d.n), d3.max(nodes, d => d.n)]) // Input range
         .range([3, 10]); 
         
     // A color scale for the nodes and links.
@@ -255,13 +256,13 @@ function arc(nodes, edges, {width} = {}) {
         .attr("transform", d => `translate(${marginLeft},${Y.get(d.id)})`)
         .call(g => g.append("text")
             .attr("x", -6)
-            .attr("font-size", d => rScale(d.n))
+            .attr("font-size", d => rScale(d.n === null ? 0 : d.n))
             .attr("dy", "0.35em")
             .attr("dx", "-0.55em")
             .attr("fill", d => d3.lab(color(d.group)).darker(2))
             .text(d => d.id))
         .call(g => g.append("circle")
-            .attr("r", d => rScale(d.n))
+            .attr("r", d => rScale(d.n === null ? 0 : d.n))
             .attr("fill", d => color(d.group)));
 
     // Add invisible rects that update the class of the elements on mouseover.
