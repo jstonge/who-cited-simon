@@ -21,7 +21,7 @@ SELECT SUM(count) as n, category from timeseries WHERE type = ${sel_field} GROUP
 ```
 
 ```js
-const sel_fieldInput = display(Inputs.select(['domain', 'subfield', 'topic'], {value: 'domain', label: "Select category"}))
+const sel_fieldInput = display(Inputs.select(['domain', 'subfield', 'topic'], {value: 'subfield', label: "Select category"}))
 const sel_field = Generators.input(sel_fieldInput)
 ```
 
