@@ -25,22 +25,19 @@ const sel_field = Generators.input(sel_fieldInput)
 ```
 
 ```js
-const sel_categoInput = display(Inputs.select(catego, {label: "Select category", multiple: true, width: 400}))
+const sel_categoInput = display(Inputs.select(catego.sort(), {label: "Select category", multiple: true, width: 400}))
 const sel_catego = Generators.input(sel_categoInput)
 ```
 
 ```js
-const top_nInput = display(Inputs.range([0,n_cat > 10 ? 10 : n_cat], {
-    label: 'top N', value: n_cat > 10 ? 5 : n_cat, step: 1
+const top_nInput = display(Inputs.range([0,catego.length > 10 ? 10 : catego.length], {
+    label: 'top N', value: catego.length > 10 ? 5 : catego.length, step: 1
     }))
 const top_n = Generators.input(top_nInput)
 ```
-```js
-const catego = Array.from(new Set(ts_citing.map(d=>d.category)))
-```
 
 ```js
-const n_cat = catego.length
+const catego = Array.from(new Set(ts_citing.map(d=>d.category)))
 ```
 
 ```js
@@ -48,7 +45,6 @@ const data_f = sel_catego.length == 0 ?
     ts_citing.filter(d=>top_cats.map(d => d.category).includes(d.category)) : 
     ts_citing.filter(d=>sel_catego.includes(d.category))
 ```
-
 
 <div class="grid grid-cols-3">
     <div class="card grid-colspan-1">
