@@ -30,12 +30,11 @@ def main():
     author_id = args.author
     input_dir = Path("src/data/incoming_citations").joinpath(author_id)
     output_dir = args.output
-    
     fnames = input_dir.glob("*parquet")
-    # Create a list to store the results
+    
+    #!TODO: could probably be much better. Make sure this is doing what you think it is doing. Output is dubious
     long_df_list = []
     for fname in tqdm(fnames):
-        # df = pd.concat([pd.read_parquet(fname) for fname in fnames], axis=0)
         df = pd.read_parquet(fname)
 
         if df.empty:
@@ -49,7 +48,7 @@ def main():
             if field == 'primary_topic':
                 df[field] = df.primary_topic.map(lambda x: x['display_name'] if x is not None else None)
             else:
-                df[field] = df.primary_topic.map(lambda x: x['field']['display_name'] if x is not None else None)
+                df[field] = df.primary_topic.map(lambda x: x[field]['display_name'] if x is not None else None)
             
             temp = (
                 df.groupby(['publication_year', field])
