@@ -42,53 +42,56 @@ def main():
     df = pd.read_parquet(input_dir / f"{author_id}.parquet")
     df = df[~df.title.isna()]
     df.sort_values("publication_year", inplace=True)
-    min_year = df.publication_year.min()
+    # min_year = df.publication_year.min()
 
     # for each paper
     tot_articles = len(df)
     for i,row in df.iterrows():
-        print(f"Processing {i+1}/{tot_articles}")
         
-        for year in range(min_year, 2024):
-
-            yearly_out_dir = output_dir / str(year)
+        # get all works that cite this paper
+        citing_works = []
+        ws = Works().filter(cites=row.id)
+        for w in chain(*ws.paginate(per_page=200)):
+            citing_works.append(w)
+        
+        # for each citing work, save the details
+        # in
+        for citing_work in citing_works:
+            # citing_work=citing_works[1]
+            # year_cited = 1947
+            year_cited = citing_work.get('publication_year')
+            
+            yearly_out_dir = output_dir / str(year_cited)
             yearly_out_dir.mkdir(exist_ok=True)
             
-            # if the paper was published before the year we are looking at
-            if year >= row.publication_year:
-
-                out_f = yearly_out_dir / f"{row.id.split('/')[-1]}.json"
-                    
-                # check if already done. 
-                if out_f.exists():
-                    print(f"Skip id {row.id}")
-                    continue
-
-                # get citing works for a given year (works that cite this work paper)
-                ws = Works().filter(cites=row.id,  publication_year=year)
-                citing_works = []
-                for w in chain(*ws.paginate(per_page=200)):
-                    citing_works.append(w)
+            author_year_f = yearly_out_dir / f"{row.id.split('/')[-1]}.json"
+            # author_year_f = yearly_out_dir / f"W1983591280.json"
             
-                if not citing_works:
-                    out = {}
-                else:
-                    # get details of each referenced work
-                    citing_works_details = []
-                    for work in tqdm(citing_works, total=len(citing_works)):
-                        
-                        try:
-                            details = Works()[work.get('id')]
-                            citing_works_details.append(details)
-                        except requests.exceptions.HTTPError:
-                            print(f"Error fetching {work}")
-                            continue
-                    out = citing_works_details
-                # save details of all referenced works, if cited
-                if len(out) > 0:
-                    with open(out_f, "w") as f:
-                        json.dump(out, f)
+            if author_year_f.exists():
+                current_data = json.load(open(author_year_f))
+                if isinstance(current_data, dict):
+                    print(f"{row.id} is a dict. Deleting")
+                    author_year_f.unlink()
+                    current_data = []
+                
+                # We check if the citing work is already in the list
+                # citing_work = Works()['W1983591280']
+                done_ids = set([w['id'] for w in current_data])
+                if citing_work.get('id') not in done_ids:
+                    current_data.append(citing_work)
+                    with open(author_year_f, "w") as f:
+                        json.dump(current_data, f)
 
+                else:
+                    print(f"{citing_work.get('id')} already done")
+            else:
+                with open(author_year_f, "w") as f:
+                    json.dump([citing_work], f)
+                
+
+
+        print(f"Processing {i+1}/{tot_articles}")
+        
 
 if __name__ == "__main__":
     main()

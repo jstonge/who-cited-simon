@@ -52,7 +52,7 @@ const tot_cit = view(Inputs.toggle({label: "Sum citations"}));
   y: {label: tot_cit ? "sum citations" : "count article", grid: true},
   style: "overflow: visible;",
   marks: [
-    Plot.rectY(topic_count, {x: "topic", y: tot_cit ? "tot_cit": "n", ry2: 4, ry1: -4, clip: "frame", sort: {x: '-y', limit: 30}}),
+    Plot.rectY(topic_count, {x: "topic", y: tot_cit ? "tot_cit": "n", ry2: 4, ry1: -4, clip: "frame", sort: {x: '-y', limit: 20}}),
     Plot.ruleY([0])
   ]
 }))}</div>
@@ -75,7 +75,7 @@ const sel_field = Generators.input(sel_fieldInput)
 ```
 
 ```js
-const sel_categoInput = display(Inputs.select(catego.sort(), {label: "Select category", multiple: true, width: 400}))
+const sel_categoInput = display(Inputs.select(catego.sort(), {label: "Select category", multiple: 16, width: 400}))
 const sel_catego = Generators.input(sel_categoInput)
 ```
 
@@ -127,7 +127,7 @@ In the default view, we note the different waves of interest for Simon's work in
 #### Table to search categories
 
 ```sql id=[...uniq_cat_search]
-SELECT DISTINCT category FROM timeseries where type = ${sel_field}
+SELECT category, SUM(count) as n FROM timeseries where type = ${sel_field} GROUP BY category ORDER BY category
 ```
 ```js
 const selected_cat = view(Inputs.search(uniq_cat_search))
@@ -253,7 +253,7 @@ function arc(nodes, edges, {width} = {}) {
 
     const rScale = d3.scaleSqrt()
         .domain([d3.min(nodes, d => d.n === null ? 0 : d.n), d3.max(nodes, d => d.n)]) // Input range
-        .range([3, 10]); 
+        .range([5, 15]); 
         
     // A color scale for the nodes and links.
     const color = d3.scaleOrdinal()
