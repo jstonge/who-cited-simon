@@ -2,7 +2,5 @@
 /dist/
 node_modules/
 yarn-error.log
-src/data/ref_works_by_year
-src/data/citations_by_year
-src/data/by_year
+src/data/incoming_citations
 myenv/

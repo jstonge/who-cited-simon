@@ -1,16 +1,16 @@
 ---
 toc: false
 sql: 
-  simon: ./data/a5108357701_clean.parquet
   simon_raw: ./data/a5108357701.parquet
-  timeseries: ./data/timeseries.parquet
+  simon: ./data/a5108357701_topic_net.parquet
+  timeseries: ./data/a5108357701_timeseries.parquet
 ---
 
 # Simon says
 ## Lets do some Herbert Simonology. 
 
 ```sql id=[...simon_raw]
-SELECT * EXCLUDE(__index_level_0__, abstract_inverted_index) FROM simon_raw ORDER BY publication_year
+SELECT * FROM simon_raw ORDER BY publication_year
 ```
 
 According to the [OpenAlex](https://openalex.org/) database, Herbert Simon published a total of ${simon_raw.length} articles in his career.
@@ -242,7 +242,7 @@ WITH source_target_groups AS (
 timeseries_summary AS (
     SELECT SUM(count) as n, category as id
     FROM timeseries
-    WHERE year > ${yr_min} AND year < ${yr_max} AND type = 'subfield'
+    WHERE publication_year > ${yr_min} AND publication_year < ${yr_max} AND type = 'subfield'
     GROUP BY category
 )
 SELECT 

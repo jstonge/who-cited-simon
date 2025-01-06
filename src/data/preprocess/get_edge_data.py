@@ -28,13 +28,11 @@ def main():
 
     args = parse_args()
     # author_id = 'a5108357701'
-    author_id = args.topic
+    author_id = args.author
     output = args.output
-    input_f = Path("data") / f"{author_id}.parquet"
+    input_f = Path("src/data") / f"{author_id}.parquet"
     df = pd.read_parquet(input_f)
-    df.topics = df.topics.map(lambda x: json.loads(x.decode('utf-8')))
-    df.reset_index(drop=True, inplace=True)
-    print(len(df))
+    
     subfield2field = {}
     for topics in df.topics:
         for topic in topics:
@@ -60,7 +58,7 @@ def main():
     tidy_df['source_field'] = tidy_df['source'].map(lambda x: subfield2field[x])
     tidy_df['target_field'] = tidy_df['target'].map(lambda x: subfield2field[x])
 
-    tidy_df.to_parquet(output / f"{author_id}_clean.parquet")
+    tidy_df.to_parquet(output / f"{author_id}_topic_net.parquet")
 
 if __name__ == "__main__":
     main()
