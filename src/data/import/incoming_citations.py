@@ -1,13 +1,9 @@
 """
-Takes a list of articles by an author and 
-gets all the works that cite those articles 
-aka incoming citations.
+Get all the works citing a list of papers by an author
 """
 from itertools import chain
 from tqdm import tqdm
 import argparse
-import requests
-import json
 from pathlib import Path
 import pandas as pd
 from pyalex import Works
@@ -23,10 +19,6 @@ def parse_args():
     return parser.parse_args()
 
 def main():  
-    """
-    API Calls = #articles * #citations_per_article
-    The output directory is year/author_paper_id:List[IncomingCitations]
-    """
     args = parse_args()      
     author_id = args.author
     input_dir = Path("src/data") 
@@ -36,7 +28,7 @@ def main():
     # grab all articles by author
     df = pd.read_parquet(input_dir / f"{author_id}.parquet")
     
-    for i,row in tqdm(df.iterrows()):
+    for i,row in tqdm(df.iterrows(), total=len(df)):
         out_f =  output_dir / f"{row.id.split("/")[-1]}.parquet"
 
         if row.title is None or out_f.exists():
@@ -48,8 +40,7 @@ def main():
         for w in chain(*ws.paginate(per_page=200)):
             citing_works.append(w)
 
-        df_citing_works = pd.DataFrame(citing_works)    
-        df_citing_works.to_parquet(out_f)
+        pd.DataFrame(citing_works).to_parquet(out_f)
 
 if __name__ == "__main__":
     main()

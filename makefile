@@ -14,24 +14,22 @@ DATA_DIR_CIT_WORKS=$(DATA_DIR)/incoming_citations
 #                    #
 ######################
 
-.PHONY: clean import wrangle-edge-data get-ref-works get-citation-works concat
+.PHONY: clean import wrangle-edge-data get-citation-works wrangle-timeseries
 
 clean:
 	rm -rf docs/.observablehq/cache
 
 # get all works of target authors from openAlex
-import:
+import: # output: f"{author_id}.parquet"
 	python $(IMPORT_DIR)/get_author_dat_oa.py -a $(author_id) -o $(DATA_DIR)
 
-wrangle-edge-data: # output: f"{author_id}_topic_net.parquet")
+get-citation-works: # output: f"{author_id}_timeseries.parquet"
+	python $(IMPORT_DIR)/incoming_citations.py -a $(author_id) -o $(DATA_DIR_CIT_WORKS)
+
+wrangle-edge-data: # output: f"{author_id}_topic_net.parquet"
 	python $(PREPRO_DIR)/get_edge_data.py -a $(author_id) -o $(DATA_DIR)
 
 # Other works ➞ Author work
-# `incoming citations.py` creates a dir of the same name, with author id as subdir.
-# Within subdir, for each year, we get JSON lines of target author works, with incoming citations, e.g.
-# 1945/W2124317547 is a list of works citing that paper (W2124317547) in 1945..
 # https://docs.openalex.org/api-entities/works/filter-works#cites
-get-citation-works: # output: timeseries.parquet
-	python $(IMPORT_DIR)/incoming_citations.py -a $(author_id) -o $(DATA_DIR_CIT_WORKS)
-
-# python $(PREPRO_DIR)/timeseries_citations.py -a $(author_id) -o $(DATA_DIR)
+wrangle-timeseries: # output: f"{author_id}_timeseries.parquet"
+	python $(PREPRO_DIR)/timeseries_citations.py -a $(author_id) -o $(DATA_DIR)

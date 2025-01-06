@@ -76,16 +76,24 @@ You can select the sum of citations by topics instead of the count of citing art
 Now, this is what Simon has done. But I wanted to know who engaged the most with Simon's work. To answer that, we compiled all the papers who cited Simon, by year. With this in hand, we could create the following timeseries:
 
 ```sql id=[...ts_citing]
-SELECT * from timeseries WHERE type = ${sel_field} ORDER BY year
+SELECT * from timeseries WHERE type = ${sel_field} ORDER BY publication_year
 ```
 
 ```sql id=[...top_cats]
-SELECT SUM(count) as n, category from timeseries WHERE type = ${sel_field} GROUP BY category ORDER BY n DESC LIMIT ${top_n}
+SELECT SUM(count) as n, category 
+from timeseries 
+WHERE type = ${sel_field} 
+GROUP BY category 
+ORDER BY n DESC LIMIT ${top_n}
 ```
 
 ```js
-const sel_fieldInput = display(Inputs.select(['domain', 'subfield', 'topic'], {value: 'subfield', label: "Select category"}))
+const sel_fieldInput = display(Inputs.select(['domain', 'subfield', 'primary_topic'], {value: 'subfield', label: "Select category"}))
 const sel_field = Generators.input(sel_fieldInput)
+```
+
+```js
+const catego = Array.from(new Set(ts_citing.map(d=>d.category)))
 ```
 
 ```js
@@ -95,13 +103,8 @@ const sel_catego = Generators.input(sel_categoInput)
 
 ```js
 const top_nInput = display(Inputs.range([0,catego.length > 10 ? 10 : catego.length], {
-    label: 'top N', value: catego.length > 10 ? 5 : catego.length, step: 1
-    }))
+    label: 'top N', value: catego.length > 10 ? 5 : catego.length, step: 1}))
 const top_n = Generators.input(top_nInput)
-```
-
-```js
-const catego = Array.from(new Set(ts_citing.map(d=>d.category)))
 ```
 
 ```js
@@ -126,7 +129,7 @@ const data_f = sel_catego.length == 0 ?
         Plot.ruleY([0]),
         Plot.lineY(
             data_f, Plot.windowY({k: 5},
-            {x: "year", y: "count", stroke: "category", tip: true})
+            {x: "publication_year", y: "count", stroke: "category", tip: true})
         )
     ],
     caption: "P.s. But lines are smoothed with k=5"
