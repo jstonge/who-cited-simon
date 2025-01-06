@@ -17,6 +17,7 @@ According to the [OpenAlex](https://openalex.org/) database, Herbert Simon publi
 
 ```js
 Plot.plot({
+  marginLeft: 50,
   y: {label: "count article", grid: true},
   marks: [
     Plot.rectY(simon_raw, Plot.binX({y: "count"}, {x: "publication_year", ry2: 4, ry1: -4, clip: "frame"})),
@@ -25,7 +26,20 @@ Plot.plot({
 })
 ```
 
-Here's the full table of his work:
+Same, but for his most cited work (if you like that kind of stuff): 
+
+```js
+Plot.plot({
+  marginLeft: 50,
+  y: {label: "count article", grid: true},
+  marks: [
+    Plot.rectY(simon_raw, Plot.binX({y: "sum"}, {x: "publication_year", y: "cited_by_count", ry2: 4, ry1: -4, clip: "frame"})),
+    Plot.ruleY([0])
+  ]
+})
+```
+
+The book in 1955 that got Simon to 35K citations is `A Behavioral Model of Rational Choice`, a classic in many fields. But also `ON A CLASS OF SKEW DISTRIBUTION FUNCTIONS`, which is a well know paper in complex systems that discuss heavy-tail distributions appearing in many different natural systems. Here's the full table of his work:
 
 <div class="card", style="padding:0">${
   Inputs.table(simon_raw)
