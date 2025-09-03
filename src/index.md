@@ -2,7 +2,7 @@
 toc: false
 sql: 
   simon_raw: data/simon_raw.parquet
-  simon: data/simon_topic_net.parquet
+  simon: data/simon.parquet
   timeseries: data/timeseries.parquet
 ---
 
