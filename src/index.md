@@ -19,7 +19,7 @@ SELECT * FROM simon_raw ORDER BY publication_year
 `)
 ```
 
-According to the [OpenAlex](https://openalex.org/) database, Herbert Simon published a total of ${simon_raw.length} articles in his career.
+According to the [OpenAlex](https://openalex.org/) database, Herbert Simon published a total of ${[...simon_raw].length} articles in his career.
 
 ```js
 Plot.plot({
