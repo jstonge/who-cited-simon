@@ -4,8 +4,8 @@ on:
   # Run this workflow whenever a new commit is pushed to main.
   push: {branches: [main]}
   # Run this workflow once per day, at 10:15 UTC
-  schedule: [{cron: "15 10 * * *"}]
-  # Run this workflow when triggered manually in GitHub's UI.
+  # schedule: [{cron: "15 10 * * *"}]
+  # Run this workflow when triggered manually in GitHub’s UI.
   workflow_dispatch: {}
 
 jobs:
@@ -24,16 +24,6 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-      - name: Create virtual environment and install dependencies
-        run: |
-          python -m venv .venv
-          source .venv/bin/activate
-          pip install -r requirements.txt
-          echo "$(pwd)/.venv/bin" >> $GITHUB_PATH
       - run: npm ci
       - run: npm run build
       - uses: actions/configure-pages@v4
