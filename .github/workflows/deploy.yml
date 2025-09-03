@@ -30,10 +30,10 @@ jobs:
           python-version: '3.11'
       - name: Create virtual environment and install dependencies
         run: |
-          python -m venv myenv
-          source myenv/bin/activate
-          pip install pandas pyarrow
-          echo "$(pwd)/myenv/bin" >> $GITHUB_PATH
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install -r requirements.txt
+          echo "$(pwd)/.venv/bin" >> $GITHUB_PATH
       - run: npm ci
       - run: npm run build
       - uses: actions/configure-pages@v4
