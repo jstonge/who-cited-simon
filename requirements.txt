@@ -1,5 +1,5 @@
-
-pandas
 pyalex
 tqdm
 fastparquet
+pandas>=2.2.1
+pyarrow==16.1

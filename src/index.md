@@ -1,9 +1,9 @@
 ---
 toc: false
 sql: 
-  simon_raw: ./data/a5108357701.parquet
-  simon: ./data/a5108357701_topic_net.parquet
-  timeseries: ./data/a5108357701_timeseries.parquet
+  simon_raw: data/simon_raw.parquet
+  simon: data/simon_topic_net.parquet
+  timeseries: data/timeseries.parquet
 ---
 
 # Simon says

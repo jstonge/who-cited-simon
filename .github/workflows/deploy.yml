@@ -5,7 +5,7 @@ on:
   push: {branches: [main]}
   # Run this workflow once per day, at 10:15 UTC
   schedule: [{cron: "15 10 * * *"}]
-  # Run this workflow when triggered manually in GitHub’s UI.
+  # Run this workflow when triggered manually in GitHub's UI.
   workflow_dispatch: {}
 
 jobs:
@@ -24,6 +24,16 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Create virtual environment and install dependencies
+        run: |
+          python -m venv myenv
+          source myenv/bin/activate
+          pip install pandas pyarrow
+          echo "$(pwd)/myenv/bin" >> $GITHUB_PATH
       - run: npm ci
       - run: npm run build
       - uses: actions/configure-pages@v4
