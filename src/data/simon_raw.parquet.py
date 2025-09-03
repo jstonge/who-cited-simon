@@ -3,9 +3,12 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 import sys
+from pathlib import Path
+import shutil
 
+TMPDIR = Path('src/.observablehq/cache/a5108357701.parquet')
 
-df = pd.read_parquet("src/data/a5108357701.parquet")
+df = pd.read_parquet(TMPDIR)
 
 # Write DataFrame to a temporary file-like object
 buf = pa.BufferOutputStream()
