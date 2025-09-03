@@ -5,7 +5,7 @@ import pyarrow.parquet as pq
 import sys
 
 
-df = pd.read_parquet("./a5108357701_topic_net.parquet")
+df = pd.read_parquet("src/data/a5108357701_topic_net.parquet")
 
 # Write DataFrame to a temporary file-like object
 buf = pa.BufferOutputStream()
