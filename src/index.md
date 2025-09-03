@@ -1,16 +1,22 @@
 ---
 toc: false
-sql: 
-  simon_raw: a5108357701.csv
-  simon: a5108357701_topic_net.csv
-  timeseries: a5108357701_timeseries.csv
 ---
+
+```js
+const db = DuckDBClient.of({
+  simon_raw: FileAttachment("a5108357701.csv").csv({typed:true}),
+  simon: FileAttachment("a5108357701_topic_net.csv").csv({typed:true}),
+  timeseries: FileAttachment("a5108357701_timeseries.csv").csv({typed:true})
+  });
+```
 
 # Simon says
 ## Lets do some Herbert Simonology. 
 
-```sql id=[...simon_raw]
+```js
+let simon_raw = db.query(`
 SELECT * FROM simon_raw ORDER BY publication_year
+`)
 ```
 
 According to the [OpenAlex](https://openalex.org/) database, Herbert Simon published a total of ${simon_raw.length} articles in his career.
@@ -48,11 +54,14 @@ The book in 1955 that got Simon to 35K citations is `A Behavioral Model of Ratio
 
 He is known to have publish in a wide variety of field of studies. Here we show the count of papers with associated [primary topics](https://docs.openalex.org/api-entities/topics):
 
-```sql id=topic_count
+
+```js
+let topic_count = db.query(`
 SELECT COUNT(primary_topic) as n, SUM(cited_by_count) as tot_cit, primary_topic as topic
 FROM simon_raw 
 WHERE primary_topic NOT NULL
 GROUP BY primary_topic
+`)
 ```
 
 ```js
@@ -75,16 +84,22 @@ You can select the sum of citations by topics instead of the count of citing art
 
 Now, this is what Simon has done. But I wanted to know who engaged the most with Simon's work. To answer that, we compiled all the papers who cited Simon, by year. With this in hand, we could create the following timeseries:
 
-```sql id=[...ts_citing]
-SELECT * from timeseries WHERE type = ${sel_field} ORDER BY publication_year
+```js
+let ts_citing = db.query(`
+SELECT * from timeseries WHERE type = '${sel_field}' ORDER BY publication_year
+`)
 ```
 
-```sql id=[...top_cats]
+
+
+```js
+let top_cats = db.query(`
 SELECT SUM(count) as n, category 
 from timeseries 
-WHERE type = ${sel_field} 
+WHERE type = '${sel_field}' 
 GROUP BY category 
-ORDER BY n DESC LIMIT ${top_n}
+ORDER BY n DESC LIMIT '${top_n}'
+`)
 ```
 
 ```js
@@ -93,7 +108,7 @@ const sel_field = Generators.input(sel_fieldInput)
 ```
 
 ```js
-const catego = Array.from(new Set(ts_citing.map(d=>d.category)))
+const catego = Array.from(new Set([...ts_citing].map(d=>d.category)))
 ```
 
 ```js
@@ -109,8 +124,8 @@ const top_n = Generators.input(top_nInput)
 
 ```js
 const data_f = sel_catego.length == 0 ? 
-    ts_citing.filter(d=>top_cats.map(d => d.category).includes(d.category)) : 
-    ts_citing.filter(d=>sel_catego.includes(d.category))
+    [...ts_citing].filter(d=>[...top_cats].map(d => d.category).includes(d.category)) : 
+    [...ts_citing].filter(d=>sel_catego.includes(d.category))
 ```
 
 <div class="grid grid-cols-3">
@@ -143,9 +158,12 @@ In the default view, we note the different waves of interest for Simon's work in
 
 #### Table to search categories
 
-```sql id=[...uniq_cat_search]
-SELECT category, SUM(count) as n FROM timeseries where type = ${sel_field} GROUP BY category ORDER BY category
+```js
+let uniq_cat_search = db.query(`
+SELECT category, SUM(count) as n FROM timeseries where type = '${sel_field}' GROUP BY category ORDER BY category
+`)
 ```
+
 ```js
 const selected_cat = view(Inputs.search(uniq_cat_search))
 ```
@@ -171,14 +189,14 @@ const yr_max = view(Inputs.range([1941, 2020], {step:1, value: 2005}))
     If you are interested which subfields are citing which papers, here is a small table summarizing that information.
   </div>
   <div>${
-    resize((width) => arc(nodes, links, {width}))
+    resize((width) => arc([...nodes], [...links], {width}))
   }
   </div>
 </div>
 
 ```js
 const degree = d3.rollup(
-  links.flatMap(({ source, target, value }) => [
+  [...links].flatMap(({ source, target, value }) => [
     { node: source, value },
     { node: target, value }
   ]),
@@ -189,7 +207,7 @@ const degree = d3.rollup(
 
 ```js
   const orders = new Map([
-    ["by name", d3.sort(nodes.map((d) => d.id))],
+    ["by name", d3.sort([...nodes].map((d) => d.id))],
     ["by group", d3.sort(nodes, ({group}) => group, ({id}) => id).map(({id}) => id)],
     ["by degree", d3.sort(nodes, ({id}) => degree.get(id), ({id}) => id).map(({id}) => id).reverse()]
   ]);
@@ -204,48 +222,54 @@ const selected_links = view(Inputs.search(nodesRaw))
 }
 </div>
 
-```sql id=[...nodesRaw]
+```js
+let nodesRaw = db.query(`
 SELECT DISTINCT title, cited_by_count, subfield
 FROM simon
-WHERE publication_year > ${yr_min} AND publication_year < ${yr_max}
+WHERE publication_year > '${yr_min}' AND publication_year < '${yr_max}'
+`)
 ```
 
 
-```sql id=[...selflinks]
+```js
+let selflinks = db.query(`
 SELECT COUNT(*) as value, source, target 
 FROM simon 
-WHERE publication_year > ${yr_min} AND publication_year < ${yr_max} AND source = target 
+WHERE publication_year > '${yr_min}' AND publication_year < '${yr_max}' AND source = target 
 GROUP BY source, target
+`)
 ```
 
 ```js
 import * as d3 from "npm:d3";
 ```
 
-```sql id=[...links]
+
+```js
+let links = db.query(`
 SELECT COUNT(*) as value, source, target 
 FROM simon 
-WHERE publication_year > ${yr_min} AND publication_year < ${yr_max} AND source != target 
+WHERE publication_year > '${yr_min}' AND publication_year < '${yr_max}' AND source != target 
 GROUP BY source, target
+`)
 ```
-
-
-```sql id=[...nodes]
+```js
+let nodes = db.query(`
 WITH source_target_groups AS (
     SELECT DISTINCT source AS id, source_field AS group
     FROM simon
-    WHERE publication_year > ${yr_min} AND publication_year < ${yr_max}
+    WHERE publication_year > '${yr_min}' AND publication_year < '${yr_max}'
 
     UNION
 
     SELECT DISTINCT target AS id, target_field AS group
     FROM simon
-    WHERE publication_year > ${yr_min} AND publication_year < ${yr_max}
+    WHERE publication_year > '${yr_min}' AND publication_year < '${yr_max}'
 ),
 timeseries_summary AS (
     SELECT SUM(count) as n, category as id
     FROM timeseries
-    WHERE publication_year > ${yr_min} AND publication_year < ${yr_max} AND type = 'subfield'
+    WHERE publication_year > '${yr_min}' AND publication_year < '${yr_max}' AND type = 'subfield'
     GROUP BY category
 )
 SELECT 
@@ -255,7 +279,7 @@ SELECT
 FROM source_target_groups AS sg
 LEFT JOIN timeseries_summary AS ts
 ON sg.id = ts.id;
-
+`)
 ```
 
 ```js
@@ -345,7 +369,7 @@ function arc(nodes, edges, {width} = {}) {
         .on("pointerenter", (event, d) => {
         svg.classed("hover", true);
         label.classed("primary", n => n === d);
-        label.classed("secondary", n => links.some(({source, target}) => (
+        label.classed("secondary", n => [...links].some(({source, target}) => (
             n.id === source && d.id == target || n.id === target && d.id === source
         )));
         path.classed("primary", l => l.source === d.id || l.target === d.id).filter(".primary").raise();
