@@ -37,7 +37,7 @@ Same, but for his most cited work (if you like that kind of stuff):
 ```js
 Plot.plot({
   marginLeft: 50,
-  y: {label: "count article", grid: true},
+  y: {label: "# citations", grid: true},
   marks: [
     Plot.rectY(simon_raw, Plot.binX({y: "sum"}, {x: "publication_year", y: "cited_by_count", ry2: 4, ry1: -4, clip: "frame"})),
     Plot.ruleY([0])
